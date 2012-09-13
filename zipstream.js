@@ -6,14 +6,13 @@
  * https://github.com/ctalkington/node-zipstream/blob/master/LICENSE-MIT
  */
 
-var zlib = require('zlib');
-var fs = require('fs');
 var assert = require('assert');
+var fs = require('fs');
 var stream = require('stream');
 var util = require('util');
+var zlib = require('zlib');
 
 var crc32 = require('./lib/crc32');
-
 
 function ZipStream(opt) {
   var self = this;
@@ -33,7 +32,7 @@ util.inherits(ZipStream, stream.Stream);
 
 exports.createZip = function(opt) {
   return new ZipStream(opt);
-}
+};
 
 // converts datetime to DOS format
 function convertDate(d) {
@@ -50,19 +49,19 @@ function convertDate(d) {
 ZipStream.prototype.pause = function() {
   var self = this;
   self.paused = true;
-}
+};
 
 ZipStream.prototype.resume = function() {
   var self = this;
   self.paused = false;
 
   self._read();
-}
+};
 
 ZipStream.prototype.destroy = function() {
   var self = this;
   self.readable = false;
-}
+};
 
 ZipStream.prototype._read = function() {
   var self = this;
@@ -84,37 +83,34 @@ ZipStream.prototype._read = function() {
   }
 
   process.nextTick(function() { self._read(); }); //TODO improve
-}
-
-
+};
 
 ZipStream.prototype.finalize = function(callback) {
   var self = this;
 
   if (self.files.length === 0) {
-    emit('error', 'no files in zip');
+    self.emit('error', 'no files in zip');
     return;
   }
 
   self.callback = callback;
   self._pushCentralDirectory();
   self.eof = true;
-}
-
+};
 
 ZipStream.prototype._addFileStore = function(source, file, callback) {
-
-}
+  // placeholder
+};
 
 ZipStream.prototype._addFileDeflate = function(source, file, callback) {
-
-}
+  // placeholder
+};
 
 ZipStream.prototype.addFile = function(source, file, callback) {
   var self = this;
 
   if (self.busy) {
-    emit('error', 'previous file not finished');
+    self.emit('error', 'previous file not finished');
     return;
   }
 
@@ -126,11 +122,9 @@ ZipStream.prototype.addFile = function(source, file, callback) {
   self.file = file;
   self._pushLocalFileHeader(file);
 
-
   var checksum = crc32.createCRC32();
   file.uncompressed = 0;
   file.compressed = 0;
-
 
   function onEnd() {
     file.crc32 = checksum.digest();
@@ -150,7 +144,6 @@ ZipStream.prototype.addFile = function(source, file, callback) {
   }
 
   if (file.store) {
-
     if (Buffer.isBuffer(source)) {
       update(source);
 
@@ -165,9 +158,7 @@ ZipStream.prototype.addFile = function(source, file, callback) {
 
       source.on('end', onEnd);
     }
-
   } else {
-
     var deflate = zlib.createDeflateRaw(self.options);
 
     deflate.on('data', function(chunk) {
@@ -178,7 +169,7 @@ ZipStream.prototype.addFile = function(source, file, callback) {
     deflate.on('end', onEnd);
 
     if (Buffer.isBuffer(source)) {
-      update(chunk);
+      update(source);
       deflate.write(source);
       deflate.end();
     } else {
@@ -194,10 +185,9 @@ ZipStream.prototype.addFile = function(source, file, callback) {
   }
 
   process.nextTick(function() { self._read(); });
-}
+};
 
-//TODO remove listeners on end
-
+// TODO remove listeners on end
 
 // local file header
 ZipStream.prototype._pushLocalFileHeader = function(file) {
@@ -229,7 +219,7 @@ ZipStream.prototype._pushLocalFileHeader = function(file) {
   len += 30;
   self.queue.push(buf.slice(0, len));
   self.fileptr += len;
-}
+};
 
 ZipStream.prototype._pushDataDescriptor = function(file) {
   var self = this;
@@ -242,7 +232,7 @@ ZipStream.prototype._pushDataDescriptor = function(file) {
 
   self.queue.push(buf);
   self.fileptr += buf.length;
-}
+};
 
 ZipStream.prototype._pushCentralDirectory = function() {
   var self = this;
@@ -302,4 +292,4 @@ ZipStream.prototype._pushCentralDirectory = function() {
 
   self.queue.push(buf);
   self.fileptr += ptr;
-}
+};
