@@ -29,8 +29,15 @@
   "engines": {
     "node": ">= 0.6.3"
   },
+  "scripts": {
+    "test": "nodeunit --reporter=minimal test/tests.js"
+  },
 
   "dependencies": {},
+
+  "devDependencies": {
+    "nodeunit": "~0.7.4"
+  },
 
   "keywords": ["zip"]
 }

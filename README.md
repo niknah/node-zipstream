@@ -31,12 +31,27 @@ var zip = zipstream.createZip({ level: 1 });
 
 zip.pipe(out);
 
-zip.addFile(fs.createReadStream('README.md'), { name: 'README.md' }, function() {
-  zip.addFile(fs.createReadStream('example.js'), { name: 'example.js' }, function() {
+zip.addFile(fs.createReadStream('file1.js'), { name: 'file1.js' }, function() {
+  zip.addFile(fs.createReadStream('file2.js'), { name: 'file2.js' }, function() {
     zip.finalize(function(written) { console.log(written + ' total bytes written'); });
   });
 });
 ```
+
+## Contributing
+
+#### Code Style Guide
+
+* code should be indented with 2 spaces
+* single quotes should be used where feasible
+* commas should be followed by a single space (function params, etc)
+* variable declaration should include `var`, [no multiple declarations](http://benalman.com/news/2012/05/multiple-var-statements-javascript/)
+
+#### Tests
+
+* tests should be added to the nodeunit config in `test/tests.js`
+* tests can be run with `npm test`
+* see existing tests for guidance
 
 ## Credits
 Originally written by Antoine van Wel ([website](http://wellawaretech.com)).
