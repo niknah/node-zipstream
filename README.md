@@ -5,7 +5,7 @@ Creates ZIP output streams. Depends on Node's build-in zlib module for compressi
 *This is a fork of the original repo meant to resolve several issues and hopefully more active development.*
 
 ## Install
-    npm install zipstream
+    npm install zipstream-ctalkington
 
 ## API
     createZip(options)
@@ -22,8 +22,9 @@ Finalizes the ZIP. When everything is done, callback is called with the total nu
 
 ## Example
 ```javascript
-var zipstream = require('zipstream');
 var fs = require('fs');
+
+var zipstream = require('zipstream-ctalkington');
 
 var out = fs.createWriteStream('out.zip');
 var zip = zipstream.createZip({ level: 1 });
