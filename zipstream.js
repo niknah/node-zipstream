@@ -1,4 +1,10 @@
-// written by Antoine van Wel (http://wellawaretech.com)
+/*
+ * node-zipstream
+ *
+ * Copyright (c) 2012 Chris Talkington, Antoine van Wel, contributors.
+ * Licensed under the MIT license.
+ * https://github.com/ctalkington/node-zipstream/blob/master/LICENSE-MIT
+ */
 
 var zlib = require('zlib');
 var fs = require('fs');
@@ -6,7 +12,7 @@ var assert = require('assert');
 var stream = require('stream');
 var util = require('util');
 
-var crc32 = require('./crc32');
+var crc32 = require('./lib/crc32');
 
 
 function ZipStream(opt) {
@@ -220,7 +226,7 @@ ZipStream.prototype._pushLocalFileHeader = function(file) {
   len = buf.write(file.name, 30);           // file name
   buf.writeUInt16LE(len, 26);               // file name length
 
-  len += 30; 
+  len += 30;
   self.queue.push(buf.slice(0, len));
   self.fileptr += len;
 }
