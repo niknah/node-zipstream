@@ -1,5 +1,5 @@
 module.exports = {
-  buffer: function (test) {
+  buffer: function(test) {
     test.expect(1);
 
     var crypto = require('crypto');
@@ -30,7 +30,7 @@ module.exports = {
     });
   },
 
-  store: function (test) {
+  store: function(test) {
     test.expect(1);
 
     var crypto = require('crypto');

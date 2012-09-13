@@ -1,6 +1,6 @@
 {
   "name": "zipstream-ctalkington",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Creates ZIP output streams.",
 
   "homepage": "https://github.com/ctalkington/node-zipstream",
