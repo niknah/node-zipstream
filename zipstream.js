@@ -6,8 +6,6 @@
  * https://github.com/ctalkington/node-zipstream/blob/master/LICENSE-MIT
  */
 
-var assert = require('assert');
-var fs = require('fs');
 var stream = require('stream');
 var util = require('util');
 var zlib = require('zlib');
@@ -55,7 +53,7 @@ ZipStream.prototype.resume = function() {
   var self = this;
   self.paused = false;
 
-  self._read();
+  self._read(function() { });
 };
 
 ZipStream.prototype.destroy = function() {
@@ -63,26 +61,35 @@ ZipStream.prototype.destroy = function() {
   self.readable = false;
 };
 
-ZipStream.prototype._read = function() {
+ZipStream.prototype._read = function(untilDone) {
   var self = this;
 
-  if (!self.readable || self.paused) { return; }
+  if (!self.readable || self.paused) { 
+    if(untilDone) untilDone(null,false);
+    return; 
+  }
 
   if (self.queue.length > 0) {
     var data = self.queue.shift();
     self.emit('data', data);
   }
-
   if (self.eof && self.queue.length === 0) {
     self.emit('end');
     self.readable = false;
+    if(untilDone) untilDone(null,true);
 
     if (self.callback) {
       self.callback(self.fileptr);
     }
-  }
-
-  process.nextTick(function() { self._read(); }); //TODO improve
+  } else if(untilDone) {
+    if(self.queue.length>0) {
+      process.nextTick(function() { 
+	self._read(untilDone);
+      });
+    } else {
+      untilDone(null,true);
+    }
+  } 
 };
 
 ZipStream.prototype.finalize = function(callback) {
@@ -96,6 +103,7 @@ ZipStream.prototype.finalize = function(callback) {
   self.callback = callback;
   self._pushCentralDirectory();
   self.eof = true;
+  self._read(function() { });
 };
 
 ZipStream.prototype._addFileStore = function(source, file, callback) {
@@ -127,15 +135,17 @@ ZipStream.prototype.addFile = function(source, file, callback) {
   file.compressed = 0;
 
   function onEnd() {
-    file.crc32 = checksum.digest();
-    if (file.store) { file.compressed = file.uncompressed; }
+    self._read(function() {
+      file.crc32 = checksum.digest();
+      if (file.store) { file.compressed = file.uncompressed; }
 
-    self.fileptr += file.compressed;
-    self._pushDataDescriptor(file);
+      self.fileptr += file.compressed;
+      self._pushDataDescriptor(file);
 
-    self.files.push(file);
-    self.busy = false;
-    callback();
+      self.files.push(file);
+      self.busy = false;
+      callback();
+    });
   }
 
   function update(chunk) {
